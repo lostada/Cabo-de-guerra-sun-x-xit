@@ -2,9 +2,16 @@ using UnityEngine;
 
 public class PlayerController : MonoBehaviour
 {
-    public bool isPlayer1; // Define se é o Player 1 ou Player 2
-    public float pullForce = 10f; // Força de puxar a corda
+    public float speed = 5f;
+    public float jumpForce = 10f;
+    public KeyCode upKey;
+    public KeyCode downKey;
+    public KeyCode leftKey;
+    public KeyCode rightKey;
+    public KeyCode jumpKey;
+
     private Rigidbody2D rb;
+    private bool isGrounded;
 
     void Start()
     {
@@ -13,13 +20,38 @@ public class PlayerController : MonoBehaviour
 
     void Update()
     {
-        if (isPlayer1 && Input.GetKey(KeyCode.Q))
+        Vector2 movement = Vector2.zero;
+
+        if (Input.GetKey(leftKey))
+            movement += Vector2.left;
+        if (Input.GetKey(rightKey))
+            movement += Vector2.right;
+
+        rb.AddForce(movement * speed);
+
+        // Pular apenas se estiver no chão
+        if (Input.GetKeyDown(jumpKey) && isGrounded)
         {
-            rb.AddForce(Vector2.left * pullForce);
+            rb.AddForce(Vector2.up * jumpForce, ForceMode2D.Impulse);
+            isGrounded = false;
         }
-        else if (!isPlayer1 && Input.GetKey(KeyCode.E))
+    }
+
+    void OnCollisionEnter2D(Collision2D collision)
+    {
+        // Verifica se colidiu com o objeto do chão
+        if (collision.gameObject.CompareTag("Ground"))
         {
-            rb.AddForce(Vector2.right * pullForce);
+            isGrounded = true;
+        }
+    }
+
+    void OnCollisionExit2D(Collision2D collision)
+    {
+        if (collision.gameObject.CompareTag("Ground"))
+        {
+            isGrounded = false;
         }
     }
 }
+
